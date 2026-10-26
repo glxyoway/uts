@@ -1,0 +1,71 @@
+1. Entitas Kuat (Strong Entity)
+Entitas yang memiliki Primary Key sendiri dan datanya dapat berdiri secara independen.
+
+A. Identifikasi Entitas dan Atribut
+
+a. KATEGORI
+Primary Key: ID_Kategori
+Atribut Lain: Nama_Kategori
+
+b. PENULIS / USERS (Supertype)
+Primary Key: ID_Penulis (user_id)
+Atribut Lain: Nama_Penulis, Email_Penulis
+
+c. ARTIKEL
+Primary Key: ID_Artikel
+Atribut Lain: Judul_Artikel, Tanggal_Terbit, Status_Publikasi (draft, published, archived), ID_Kategori (Foreign Key)
+
+d. TAG
+Primary Key: ID_Tag
+Atribut Lain: Nama_Tag
+
+2. Entitas Anak / Subtype (Spesialisasi)
+Entitas khusus yang mewarisi atribut dari entitas induk (PENULIS).
+
+a. REPORTER
+Primary Key / Foreign Key: ID_Penulis (merujuk ke PENULIS.ID_Penulis)
+Atribut Khusus: Bidang_Liputan (misal: Politik, Teknologi, Ekonomi)
+
+b. EDITOR
+Primary Key / Foreign Key: ID_Penulis (merujuk ke PENULIS.ID_Penulis)
+Atribut Khusus: Level_Editor (misal: Reviewer, Publisher)
+
+3. Entitas Asosiatif / Lemah (Weak Entity)
+Entitas yang terbentuk dari penguraian relasi Many-to-Many (M:N) dan keberadaannya bergantung pada entitas utama.
+
+a. ARTIKEL_PENULIS
+Composite Primary Key / Foreign Key: ID_Artikel + ID_Penulis
+Atribut: Peran_Penulis (misal: Penulis Utama, Co-Author, Editor Artikel)
+
+b. ARTIKEL_TAG
+Composite Primary Key / Foreign Key: ID_Artikel + ID_Tag
+
+c. KOMENTAR
+Primary Key: ID_Komentar
+Foreign Key: ID_Artikel
+Atribut: Nama_Pengirim, Isi_Komentar, Tanggal_Komentar
+
+B. Pemetaan Relasi, Kardinalitas, dan Aturan Bisnis
+Kode Relasi,Pasangan Entitas,Kardinalitas,Derajat,Aturan Bisnis,Foreign Key (Konseptual)
+R1,KATEGORI ➔ ARTIKEL,1 : N,Biner,"Satu kategori dapat mengelompokkan banyak artikel, namun satu artikel hanya boleh terdaftar pada satu kategori utama.",ARTIKEL.ID_Kategori ➔ KATEGORI.ID_Kategori
+R2,ARTIKEL ➔ ARTIKEL_PENULIS,1 : N,Biner,Mengurai relasi M:N antara Artikel dan Penulis. Satu artikel bisa ditulis/diedit oleh banyak staf redaksi.,ARTIKEL_PENULIS.ID_Artikel ➔ ARTIKEL.ID_Artikel
+R3,PENULIS ➔ ARTIKEL_PENULIS,1 : N,Biner,Mengurai relasi M:N. Satu staf penulis dapat berkontribusi pada banyak artikel.,ARTIKEL_PENULIS.ID_Penulis ➔ PENULIS.ID_Penulis
+R4,ARTIKEL ➔ ARTIKEL_TAG,1 : N,Biner,Mengurai relasi M:N antara Artikel dan Tag. Satu artikel dapat diberi banyak label tag.,ARTIKEL_TAG.ID_Artikel ➔ ARTIKEL.ID_Artikel
+R5,TAG ➔ ARTIKEL_TAG,1 : N,Biner,Satu tag dapat disematkan pada banyak artikel.,ARTIKEL_TAG.ID_Tag ➔ TAG.ID_Tag
+R6,ARTIKEL ➔ KOMENTAR,1 : N,Biner,Satu artikel dapat menerima banyak komentar dari pembaca.,KOMENTAR.ID_Artikel ➔ ARTIKEL.ID_Artikel
+
+C. Penerapan Varian Entitas Lanjutan (Spesialisasi)
+Pada entitas PENULIS, diterapkan varian entitas lanjutan berupa Spesialisasi (Top-Down):
+
+Alasan Bisnis: Staf redaksi CMS memiliki spesifikasi tugas yang berbeda. Pembaca berita butuh tahu area liputan seorang reporter, sementara sistem butuh tahu tingkat wewenang seorang editor. Jika semua atribut disatukan dalam satu tabel utama, akan timbul banyak nilai kosong (NULL Value).
+Batasan Keanggotaan — Overlapping (o): Satu staf penulis diizinkan memiliki peran ganda (beririsan), yaitu dapat menjadi REPORTER di satu artikel sekaligus EDITOR pada artikel lainnya.
+Batasan Kelengkapan — Total: Setiap data staf yang didaftarkan ke dalam sistem wajib memiliki minimal satu peran fungsional sebagai REPORTER atau EDITOR.
+
+D. Komponen Visual ERD (Notasi Chen)
+Saat membuat/menggambar Diagram ERD pada perangkat lunak desain (seperti Draw.io atau StarUML), berikut panduan notasi yang digunakan:
+
+Entitas Kuat: Digambarkan dengan Persegi Panjang Tunggal (KATEGORI, PENULIS, ARTIKEL, TAG).
+Entitas Asosiatif / Lemah: Digambarkan dengan Persegi Panjang Ganda (ARTIKEL_PENULIS, ARTIKEL_TAG, KOMENTAR).
+Relasi: Digambarkan dengan Belah Ketupat (MENGELOMPOKKAN, MENULIS, DILABELI, MEMILIKI). Untuk relasi entitas lemah digunakan Belah Ketupat Ganda.
+Atribut: Digambarkan dengan Elipse. Atribut yang bertindak sebagai Primary Key harus digarisbawahi (misal: ID_Artikel).
+Spesialisasi: Lingkaran dengan huruf o di tengahnya yang menghubungkan entitas PENULIS ke entitas anak REPORTER dan EDITOR, dengan garis ganda dari PENULIS ke lingkaran o untuk menandai batasan Total.
